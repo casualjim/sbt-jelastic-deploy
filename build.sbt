@@ -4,7 +4,7 @@ name := "sbt-jelastic-deploy"
 
 organization := "com.github.casualjim"
 
-version := "0.1.0"
+version := "0.1.1"
 
 libraryDependencies ++= Seq(
   "net.databinder.dispatch" %% "core" % "0.9.0",

@@ -39,7 +39,7 @@ object JelasticPlugin extends sbt.Plugin {
     deploy <<= jelasticDeployTask
   )
 
-  val jelasticSettings: Seq[Setting[_]] = warSettings ++ jelasticSettingsIn(Compile) ++ Seq(headers := Map.empty)
+  val jelasticSettings: Seq[Setting[_]] = jelasticSettingsIn(Compile) ++ Seq(headers := Map.empty)
 
   import JelasticClient.read
   private def jelasticDeployTask =
