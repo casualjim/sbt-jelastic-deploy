@@ -9,7 +9,7 @@ For more information on how to configure the xsbt-web-plugin, visit its [wiki](h
 This plugin only works with sbt 0.12.x or higher
 
 ```scala
-addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.1")
+addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.2")
 ```
 
 If you use this plugin in conjuction with xsbt-gpg-plugin you need version 0.7 or higher.

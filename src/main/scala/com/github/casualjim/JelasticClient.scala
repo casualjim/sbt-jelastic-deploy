@@ -24,17 +24,14 @@ object JelasticClient {
   val mapper = new ObjectMapper
   mapper.registerModule(DefaultScalaModule)
 
-  private[this] def deserialize[T: Manifest](src: InputStream): T = {
-    val res = mapper.readValue[T](src, new TypeReference[T]() {
+  private[this] def deserialize[T: Manifest](src: InputStream): T = 
+    mapper.readValue[T](src, new TypeReference[T]() {
       override def getType = new ParameterizedType {
         val getActualTypeArguments = manifest[T].typeArguments.map(_.erasure.asInstanceOf[Type]).toArray
         val getRawType = manifest[T].erasure
         val getOwnerType = null
       }
     })
-    println("deserialized: %s" format res)
-    res
-  }
 
   object read {
 
@@ -59,11 +56,6 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
 
   import scala.collection.JavaConverters._
 
-//  val http = new Http {
-//    override val client: AsyncHttpClient = new AsyncHttpClient(
-//      new AsyncHttpClientConfig.Builder().setRequestTimeoutInMs()
-//    )
-//  }
   private implicit def headerVerb(req: RequestBuilder) = new {
     def <:<(headers: Map[String, String]) = {
       headers foreach {
@@ -115,7 +107,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
 
   def authenticate(login: String, password: String): JelasticResponse.Authentication = {
     val req = reqBase / AuthenticationPath
-    logger.info("Making authentication request to: " + req.build.toString)
+    logger.debug("Making authentication request to: " + req.build.toString)
     logger.debug("login: " + login)
     logger.debug("password: " + password)
 
@@ -124,7 +116,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
 
   def upload(auth: JelasticResponse.Authentication, file: File): JelasticResponse.Uploader = {
     val req = reqBase / UploaderPath
-    logger.info("Making upload request to: " + req.build.toString)
+    logger.debug("Making upload request to: " + req.build.toString)
     logger.debug("file: " + file.getAbsolutePath)
     val pcfg = new PerRequestConfig()
     pcfg.setRequestTimeoutInMs(300000)
@@ -144,10 +136,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
       }
     }
 
-    logger.info("The request:")
-    val r = req.withCookies <<< Map("fid" -> "123456", "session" -> auth.session, "file" -> file)
-    logger.info(r.build().toString)
-    Http(r > uploader)()
+    Http(req.withCookies <<< Map("fid" -> "123456", "session" -> auth.session, "file" -> file) > uploader)()
   }
 
   def createObject(name: String, comment: String, uploader: JelasticResponse.Uploader, auth: JelasticResponse.Authentication): JelasticResponse.Create = {
@@ -159,7 +148,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
       "type" -> "JDeploy",
       "data" -> data)
 
-    logger.info("Making create request to: " + (reqBase / CreatePath).build.toString)
+    logger.debug("Making create request to: " + (reqBase / CreatePath).build.toString)
     logger.debug("params: %s" format params)
     Http(reqBase.withCookies / CreatePath << params OK (keepCookies andThen read.Create))()
   }
@@ -173,14 +162,14 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
       "newContext" -> context,
       "domain" -> environment
     )
-    logger.info("Making deploy request to: " + (reqBase / DeployPath).build.toString)
+    logger.debug("Making deploy request to: " + (reqBase / DeployPath).build.toString)
     logger.debug("params: %s" format params)
     Http(reqBase.withCookies / DeployPath << params OK (keepCookies andThen read.Deploy))()
   }
 
   def logout(auth: JelasticResponse.Authentication): JelasticResponse.Logout = {
     val params = Map("charset" -> "UTF-8", "session" -> auth.session)
-    logger.info("Making logout request to: " + (reqBase / LogoutPath).build.toString)
+    logger.debug("Making logout request to: " + (reqBase / LogoutPath).build.toString)
     logger.debug("params: %s" format params)
     Http(reqBase.withCookies / LogoutPath <<? params OK (clearCookies andThen read.Logout))()
   }
