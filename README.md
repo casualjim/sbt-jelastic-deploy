@@ -9,7 +9,21 @@ For more information on how to configure the xsbt-web-plugin, visit its [wiki](h
 This plugin only works with sbt 0.12.x or higher
 
 ```scala
-addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.0"
+addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.1"
+```
+
+If you use this plugin in conjuction with xsbt-gpg-plugin you need version 0.7 or higher.
+Currently this isn't available in maven yet but you can add a source dependency in ~/.sbt/plugins/project/plugins.scala. And remove the declaration in your ~/.sbt/plugins/plugins.sbt file.
+
+```scala
+import sbt._
+import Keys._
+
+object GlobalPluginsBuild extends Build {
+  
+  lazy val root = (Project("plugins", file(".")) 
+                    dependsOn uri("git://github.com/sbt/xsbt-gpg-plugin.git#sbt-0.12"))
+}
 ```
 
 ## Configuring the plugin
