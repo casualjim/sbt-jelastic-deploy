@@ -1,0 +1,14 @@
+{
+    "response":{
+        "result":0,
+        "out":"node [770] \rStopping tomcat: \nWaiting for processes to exit..\nWaiting for processes to exit..\nWaiting for processes to exit..\nSending the Tomcat processes a SIGTERM asking them to shut down gracefully..\nWaiting for processes to exit..\nWaiting for processes to exit..\n[  OK  ]\r\naudit_log_user_command(): Connection refused\n--2011-06-09 18:33:32--  http://api.hivext.com/xssu/rest/download/VWIDB1xTVUo2AjtFFBUBFAAcQUsBEmwbf3kjVRVDRQIPAQBCY1VLQEg%3D\nResolving api.hivext.com... 91.194.250.195\nConnecting to api.hivext.com|91.194.250.195|:80... connected.\nHTTP request sent, awaiting response... 200 OK\nLength: 21072 (21K) [application/octet-stream]\nSaving to: `/opt/tomcat/webapps/ROOT.war'\n\n     0K .......... ..........                                 100%  357K=0.06s\n\n2011-06-09 18:33:33 (357 KB/s) - `/opt/tomcat/webapps/ROOT.war' saved [21072/21072]\n\nStarting tomcat: [  OK  ]\r\n"
+    },
+    "result":0,
+    "debug":{
+        "time":16711,
+        "cpu":{
+            "usage":0.0074802614,
+            "time":10
+        }
+    }
+}
