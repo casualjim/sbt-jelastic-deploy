@@ -31,6 +31,8 @@ object GlobalPluginsBuild extends Build {
 The plugin requires a couple of keys to be set. In build.sbt:
 
 ```scala
+import JelasticKeys._
+
 seq(jelasticSettings:_*)
 
 email in deploy := "YOUR_EMAIL_HERE"
