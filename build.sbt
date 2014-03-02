@@ -6,8 +6,9 @@ organization := "com.github.casualjim"
 
 version := "0.1.4-SNAPSHOT"
 
+libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
+
 libraryDependencies ++= Seq(
-  "net.databinder.dispatch" %% "core" % "0.9.1",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.1",
   "com.fasterxml.jackson.module" % "jackson-module-scala" % "2.1.2",
   "io.backchat.inflector" %% "scala-inflector" % "1.3.5",
