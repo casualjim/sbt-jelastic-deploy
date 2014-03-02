@@ -94,7 +94,13 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
   }
 
   def upload(auth: JelasticResponse.Authentication, file: File): JelasticResponse.Uploader = {
-    val req = reqBase / UploaderPath
+    val req = reqBase.POST / UploaderPath <:< Map("Content-Type" -> "multipart/form-data")
+    val withCookies = cookies.foldLeft(req){ _ addCookie _ }
+    val pars: Map[String, Any] = Map("fid" -> "123456", "session" -> auth.session, "file" -> file)
+    val request = pars.foldLeft(withCookies){
+      case (r, (k, v: String)) => r.addBodyPart(new StringPart(k, v))
+      case (r, (k, v: File)) => r.addBodyPart(new FilePart(k, v))
+    }
     logger.debug("Making upload request to: " + req.toRequest.toString)
     logger.debug("file: " + file.getAbsolutePath)
 
@@ -112,12 +118,11 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
         super.onContentWriteProgress(amount, current, total)
       }
     }
-    Await.result(Http(cookies.foldLeft(req){ _ addCookie _ } << Map("fid" -> "123456", "session" -> auth.session) <<< file > uploader), 5.minutes)
+    Await.result(Http(request > uploader), 5.minutes)
   }
 
   def createObject(name: String, comment: String, uploader: JelasticResponse.Uploader, auth: JelasticResponse.Authentication): JelasticResponse.Create = {
-    val dataFmt = """{"name":"%s", "archive":"%s", "link":0, "size":%s, "comment":"%s"}"""
-    val data = dataFmt.format(name, uploader.file, uploader.size, comment)
+    val data = s"""{"name":"$name", "archive":"${uploader.file}", "link":0, "size":${uploader.size}, "comment":"$comment"}"""
     val params = Map(
       "charset" -> "UTF-8",
       "session" -> auth.session,
