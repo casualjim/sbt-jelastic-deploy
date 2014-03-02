@@ -6,7 +6,14 @@ For more information on how to configure the xsbt-web-plugin, visit its [wiki](h
 
 ## Installing the plugin
 
-This plugin only works with sbt 0.12.x or higher
+For sbt 0.13.x
+
+```scala
+addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.3")
+```
+
+
+For sbt 0.12.x
 
 ```scala
 addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.2")
