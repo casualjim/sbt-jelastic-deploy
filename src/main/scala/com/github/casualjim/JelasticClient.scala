@@ -1,6 +1,6 @@
 package com.github.casualjim
 
-import dispatch._
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.core.`type`.TypeReference
@@ -10,6 +10,7 @@ import com.ning.http.client._
 import com.ning.http.multipart.{StringPart, FilePart}
 import com.ning.http.client.AsyncHandler.STATE
 import sbt.Logger
+import dispatch._
 
 object JelasticClient {
 
@@ -27,8 +28,8 @@ object JelasticClient {
   private[this] def deserialize[T: Manifest](src: InputStream): T = 
     mapper.readValue[T](src, new TypeReference[T]() {
       override def getType = new ParameterizedType {
-        val getActualTypeArguments = manifest[T].typeArguments.map(_.erasure.asInstanceOf[Type]).toArray
-        val getRawType = manifest[T].erasure
+        val getActualTypeArguments = manifest[T].typeArguments.map(_.runtimeClass.asInstanceOf[Type]).toArray
+        val getRawType = manifest[T].runtimeClass
         val getOwnerType = null
       }
     })
@@ -57,12 +58,6 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
   import scala.collection.JavaConverters._
 
   private implicit def headerVerb(req: RequestBuilder) = new {
-    def <:<(headers: Map[String, String]) = {
-      headers foreach {
-        case (name, value) => req.addHeader(name, value)
-      }
-      req
-    }
 
     def <<<(params: Map[String, Any]) = {
       req.setMethod("POST")
@@ -91,7 +86,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
 
   private val keepCookies = (resp: Response) => {
     val nw = resp.getCookies.asScala.toSeq
-    cookies = cookies.filterNot(c => nw.exists(_ == c.getName)) ++ nw
+    cookies = cookies.filterNot(c => nw.exists(_.getName == c.getName)) ++ nw
     cookies foreach {
       cookie =>
         logger.debug("Cookie: %s with value: %s" format(cookie.getName, cookie.getValue))

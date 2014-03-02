@@ -23,8 +23,8 @@ object JelasticPlugin extends sbt.Plugin {
   }
 
   import JelasticKeys._
-  import com.github.siasia.PluginKeys._
-  import com.github.siasia.WarPlugin._
+  import com.earldouglas.xsbtwebplugin.PluginKeys._
+  import com.earldouglas.xsbtwebplugin.WarPlugin._
 
   private def jelasticSettingsIn(c: Configuration) = inConfig(c)( jelasticSettings0 )
 
