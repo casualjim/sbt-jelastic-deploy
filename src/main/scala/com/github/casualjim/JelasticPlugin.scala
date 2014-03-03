@@ -41,7 +41,6 @@ object JelasticPlugin extends sbt.Plugin {
 
   val jelasticSettings: Seq[Setting[_]] = jelasticSettingsIn(Compile) ++ Seq(headers := Map.empty)
 
-  import JelasticClient.read
   private def jelasticDeployTask =
     (apiHoster, email in deploy, password in deploy, comment in deploy, onlyUpload in deploy, context in deploy, environment in deploy, headers, port in deploy, packageWar in Compile, streams) map {
       (h, eml, pass, cmt, onlyUpl, ctxt, env, hdrs, p, warFile, s) =>
@@ -54,12 +53,23 @@ object JelasticPlugin extends sbt.Plugin {
             s.log.info("Upload of %s with size %s succeeded.".format(uploader.file, uploader.size))
             val create = client.createObject(warFile.getName, cmt, uploader, auth)
             if (create.result == 0) {
-              s.log.info("File registration for developer " + create.response.obj.developer + " success")
+              for {
+                r <- Option(create.response)
+                o <- Option(r.obj)
+                d <- Option(o.developer)
+              } s.log.info(s"File registration for developer $d success")
               if (!onlyUpl) {
                 val deploy = client.deploy(env, ctxt, create, uploader, auth)
                 if (deploy.result == 0) {
                   s.log.info("Deploy success")
-                  s.log.info(deploy.response.responses.head.out)
+
+                  for {
+                    r <- Option(deploy.response)
+                    rs <- Option(r.responses)
+                    h <- rs.headOption
+                    o <- Option(h.out)
+                  } s.log.info(o)
+
                   val logout = client.logout(auth)
                   if (logout.result == 0) {
                     s.log.info("Logged out of jelastic.")

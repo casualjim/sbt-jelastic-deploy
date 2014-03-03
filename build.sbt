@@ -10,7 +10,7 @@ libraryDependencies += "net.databinder.dispatch" %% "dispatch-core" % "0.11.0"
 
 libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.3.1",
-  "com.fasterxml.jackson.module" % "jackson-module-scala" % "2.1.2",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.3.1",
   "io.backchat.inflector" %% "scala-inflector" % "1.3.5",
   "org.specs2" %% "specs2" % "2.3.8" % "test"
 )

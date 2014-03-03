@@ -18,11 +18,6 @@ object JelasticClient {
 
   val Scheme = "https"
   val ApiVersion = "1.0"
-  val AuthenticationPath = "%s/users/authentication/rest/signin".format(ApiVersion)
-  val UploaderPath = "%s/storage/uploader/rest/upload".format(ApiVersion)
-  val CreatePath = "deploy/createObject"
-  val DeployPath = "deploy/DeployArchive"
-  val LogoutPath = "users/authentication/rest/signout"
 
   val mapper = new ObjectMapper
   mapper.registerModule(DefaultScalaModule)
@@ -85,7 +80,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
 
 
   def authenticate(login: String, password: String): JelasticResponse.Authentication = {
-    val req = reqBase / AuthenticationPath
+    val req = reqBase / ApiVersion / "users" / "authentication" / "rest" / "signin"
     logger.debug("Making authentication request to: " + req.toRequest.toString)
     logger.debug("login: " + login)
     logger.debug("password: " + password)
@@ -94,7 +89,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
   }
 
   def upload(auth: JelasticResponse.Authentication, file: File): JelasticResponse.Uploader = {
-    val req = reqBase.POST / UploaderPath <:< Map("Content-Type" -> "multipart/form-data")
+    val req = reqBase.POST / ApiVersion / "storage" / "uploader" / "rest" / "upload" <:< Map("Content-Type" -> "multipart/form-data")
     val withCookies = cookies.foldLeft(req){ _ addCookie _ }
     val pars: Map[String, Any] = Map("fid" -> "123456", "session" -> auth.session, "file" -> file)
     val request = pars.foldLeft(withCookies){
@@ -118,7 +113,7 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
         super.onContentWriteProgress(amount, current, total)
       }
     }
-    Await.result(Http(request > uploader), 5.minutes)
+    Await.result(Http(request > uploader), 10.minutes)
   }
 
   def createObject(name: String, comment: String, uploader: JelasticResponse.Uploader, auth: JelasticResponse.Authentication): JelasticResponse.Create = {
@@ -129,9 +124,10 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
       "type" -> "JDeploy",
       "data" -> data)
 
-    logger.debug("Making create request to: " + (reqBase / CreatePath).toRequest.toString)
+    val req = cookies.foldLeft(reqBase){ _ addCookie _ } / "deploy" / "createObject"
+    logger.debug(s"Making create request to: ${req.toRequest.toString}")
     logger.debug("params: %s" format params)
-    Await.result(Http(cookies.foldLeft(reqBase){ _ addCookie _ } / CreatePath << params OK (keepCookies andThen read.Create)), 30.seconds)
+    Await.result(Http(req << params OK (keepCookies andThen read.Create)), 30.seconds)
   }
 
   def deploy(environment: String, context: String, create: JelasticResponse.Create, uploader: JelasticResponse.Uploader, auth: JelasticResponse.Authentication): JelasticResponse.Deploy = {
@@ -143,15 +139,17 @@ class JelasticClient(apiHoster: String = "j.layershift.co.uk", port: Int = 443, 
       "newContext" -> context,
       "domain" -> environment
     )
-    logger.debug("Making deploy request to: " + (reqBase / DeployPath).toRequest.toString)
+    val req = cookies.foldLeft(reqBase){_ addCookie _} / "deploy" / "DeployArchive"
+    logger.debug(s"Making deploy request to: ${req.toRequest.toString}")
     logger.debug("params: %s" format params)
-    Await.result(Http(cookies.foldLeft(reqBase){_ addCookie _} / DeployPath << params OK (keepCookies andThen read.Deploy)), 30.seconds)
+    Await.result(Http(req << params OK (keepCookies andThen read.Deploy)), 10.minutes)
   }
 
   def logout(auth: JelasticResponse.Authentication): JelasticResponse.Logout = {
     val params = Map("charset" -> "UTF-8", "session" -> auth.session)
-    logger.debug("Making logout request to: " + (reqBase / LogoutPath).toRequest.toString)
+    val req = cookies.foldLeft(reqBase){_ addCookie _} / "users" / "authentication" / "rest" / "signout"
+    logger.debug(s"Making logout request to: ${req.toRequest.toString}")
     logger.debug("params: %s" format params)
-    Await.result(Http(cookies.foldLeft(reqBase){_ addCookie _} / LogoutPath <<? params OK (clearCookies andThen read.Logout)), 30 seconds)
+    Await.result(Http(req <<? params OK (clearCookies andThen read.Logout)), 30 seconds)
   }
 }
