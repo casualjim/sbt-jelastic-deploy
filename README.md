@@ -6,6 +6,13 @@ For more information on how to configure the xsbt-web-plugin, visit its [wiki](h
 
 ## Installing the plugin
 
+Add plugin resolver
+
+```scala
+resolvers += Resolver.url("sbt-plugin-releases",
+  new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns)
+```
+
 For sbt 0.13.x
 
 ```scala
