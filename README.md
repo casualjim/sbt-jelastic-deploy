@@ -16,7 +16,7 @@ resolvers += Resolver.url("sbt-plugin-releases",
 For sbt 0.13.x
 
 ```scala
-addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.3")
+addSbtPlugin("com.github.casualjim" % "sbt-jelastic-deploy" % "0.1.4")
 ```
 
 
